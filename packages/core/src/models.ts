@@ -203,3 +203,6 @@ export const fetchCodexModelCatalog = async (
 export const isPublicCodexModel = (model: CodexModelInfo): boolean =>
 	model.supportedInApi !== false &&
 	(model.visibility === undefined || model.visibility === "list")
+
+export const isGptImageModel = (id: string): boolean =>
+	/^gpt-image(?:-|$)/i.test(id)

@@ -33,6 +33,8 @@ const createMockFetch = (
 						{ slug: "gpt-5.2", visibility: "list" },
 						{ slug: "gpt-5.4-mini", visibility: "list" },
 						{ slug: "codex-auto-review", visibility: "hide" },
+						{ slug: "gpt-image-1", visibility: "list" },
+						{ slug: "gpt-image-1.5", visibility: "list" },
 						{
 							slug: "gpt-5.6-sol",
 							visibility: "list",
@@ -135,7 +137,7 @@ describe("createCodexOAuthFetch", () => {
 		const fetch = createMockFetch()
 		const connection = createOpenAIOAuthTransport({ auth: session, fetch })
 
-		const response = await connection.request("/models")
+		const response = await connection.request("/models?client_version=0.144.1")
 		const payload = await response.json()
 
 		expect(response.status).toBe(200)
@@ -143,7 +145,6 @@ describe("createCodexOAuthFetch", () => {
 			"gpt-5.2",
 			"gpt-5.4-mini",
 			"gpt-5.6-sol",
-			"gpt-image-2",
 		])
 		expect(upstreamCalls(fetch)).toHaveLength(0)
 	})

@@ -14,6 +14,7 @@ describe("model discovery", () => {
 				object: "list",
 				data: [
 					{ id: "gpt-5.6-sol", object: "model" },
+					{ id: "gpt-image-1.5", object: "model" },
 					{ id: "gpt-5.6-terra", object: "model" },
 				],
 			}),
@@ -30,7 +31,12 @@ describe("model discovery", () => {
 		const codex = client(Response.json({ data: [] }))
 
 		await expect(
-			resolveOpenAIOAuthModels(codex, ["gpt-5.4", "gpt-5.3-codex", "gpt-5.4"]),
+			resolveOpenAIOAuthModels(codex, [
+				"gpt-5.4",
+				"gpt-image-2",
+				"gpt-5.3-codex",
+				"gpt-5.4",
+			]),
 		).resolves.toEqual(["gpt-5.4", "gpt-5.3-codex"])
 		expect(codex.request).not.toHaveBeenCalled()
 	})

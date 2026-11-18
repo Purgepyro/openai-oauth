@@ -78,10 +78,7 @@ describe("createOpenAIOptions", () => {
 		)
 
 		const models = await client.models.list()
-		expect(models.data.map((model) => model.id)).toEqual([
-			"gpt-5.6-sol",
-			"gpt-image-2",
-		])
+		expect(models.data.map((model) => model.id)).toEqual(["gpt-5.6-sol"])
 
 		const response = await client.responses.create({
 			model: "gpt-5.6-sol",

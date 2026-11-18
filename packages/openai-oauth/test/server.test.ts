@@ -31,7 +31,7 @@ describe("openai oauth server", () => {
 
 	test("lists configured models", async () => {
 		const handler = createOpenAIOAuthFetchHandler({
-			models: ["gpt-5.2", "gpt-5.1-codex"],
+			models: ["gpt-5.2", "gpt-image-2", "gpt-5.1-codex"],
 		})
 
 		const response = await handler(
@@ -74,6 +74,7 @@ describe("openai oauth server", () => {
 					models: [
 						{ slug: "gpt-5.2" },
 						{ slug: "gpt-5.1-codex" },
+						{ slug: "gpt-image-1.5" },
 						{ slug: "gpt-5.2" },
 					],
 				}),
@@ -120,12 +121,6 @@ describe("openai oauth server", () => {
 					created: 0,
 					owned_by: "codex-oauth",
 				},
-				{
-					id: "gpt-image-2",
-					object: "model",
-					created: 0,
-					owned_by: "codex-oauth",
-				},
 			],
 		})
 
@@ -133,6 +128,27 @@ describe("openai oauth server", () => {
 			recursive: true,
 			force: true,
 		})
+	})
+
+	test("returns an empty list when discovery only finds image models", async () => {
+		const authFilePath = await createAuthFile()
+		try {
+			const handler = createOpenAIOAuthFetchHandler({
+				authFilePath,
+				ensureFresh: false,
+				codexVersion: "0.144.1",
+				fetch: async () => Response.json({ models: [{ slug: "gpt-image-2" }] }),
+			})
+			const response = await handler(new Request("http://localhost/v1/models"))
+
+			expect(response.status).toBe(200)
+			await expect(response.json()).resolves.toEqual({
+				object: "list",
+				data: [],
+			})
+		} finally {
+			await fs.rm(path.dirname(authFilePath), { recursive: true, force: true })
+		}
 	})
 
 	test("returns an upstream error when codex model discovery fails", async () => {

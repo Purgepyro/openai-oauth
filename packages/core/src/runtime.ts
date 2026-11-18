@@ -1,7 +1,8 @@
-import { CODEX_IMAGE_MODEL, prepareCodexImageRequest } from "./images.js"
+import { prepareCodexImageRequest } from "./images.js"
 import {
 	type CodexModelInfo,
 	fetchCodexModelCatalog,
+	isGptImageModel,
 	isPublicCodexModel,
 } from "./models.js"
 import { collectCompletedResponseFromSse } from "./sse.js"
@@ -937,17 +938,14 @@ const createCodexOAuthFetch = (
 		const auth = await resolveAuth(settings.auth)
 		if (
 			(request.method ?? "GET").toUpperCase() === "GET" &&
-			target.pathname.endsWith("/models") &&
-			!target.searchParams.has("client_version")
+			target.pathname.endsWith("/models")
 		) {
 			const catalog = await resolveModelCatalog(auth)
-			const models = catalog.models.filter(isPublicCodexModel)
-			if (models.length === 0) {
+			if (catalog.error) {
 				return Response.json(
 					{
 						error: {
-							message:
-								catalog.error?.message ?? "Failed to load models from Codex.",
+							message: catalog.error.message,
 						},
 					},
 					{ status: 502 },
@@ -955,24 +953,17 @@ const createCodexOAuthFetch = (
 			}
 			return Response.json({
 				object: "list",
-				data: [
-					...models.map((model) => ({
+				data: catalog.models
+					.filter(
+						(model) =>
+							isPublicCodexModel(model) && !isGptImageModel(model.slug),
+					)
+					.map((model) => ({
 						id: model.slug,
 						object: "model",
 						created: 0,
 						owned_by: "codex-oauth",
 					})),
-					...(models.some((model) => model.slug === CODEX_IMAGE_MODEL)
-						? []
-						: [
-								{
-									id: CODEX_IMAGE_MODEL,
-									object: "model",
-									created: 0,
-									owned_by: "codex-oauth",
-								},
-							]),
-				],
 			})
 		}
 

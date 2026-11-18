@@ -1,3 +1,4 @@
+export { isGptImageModel } from "./models.js"
 export {
 	createOpenAIOAuthRequest,
 	createOpenAIOAuthTransport,
